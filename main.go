@@ -12,30 +12,34 @@ import (
 
 func main() {
 	cookie := "341318425&A12BB1C0140ND095F1D43A93EFBA1CBF9CC0B65F13A7D5CAA4FB929503ED2F149606644FC94E139MA66077EE060FFE6_"
-	err := download("jinbi1", 31909017, false, true, cookie)
+	err := download("jb2", "jinbi2", 38624498, true, false, cookie)
+	//err := download("jinbi2", 31909017, false, false, cookie)
 	if err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func download(path string, albumID int32, dFree, dVip bool, cookie string) (err error) {
-	info, err := xmlydownloader.GetAllAudioInfo(31909017)
-	//info, err := xmlydownloader.GetTrackList(31909017, 1, true)
+func download(prefix, path string, albumID int, dFree, dVip bool, cookie string) (err error) {
+	info, err := xmlydownloader.GetAllAudioInfo(albumID)
 	if err != nil {
 		return
 	}
 	if !gfile.Exists(path) {
 		gfile.Mkdir(path)
 	}
+	var index = 1
 	for _, v := range info {
 		fmt.Printf("%d, %s, %t, %t\n", v.TrackID, v.Title, v.IsFree, v.IsPaid)
-		if v.IsFree {
+		//if v.IsFree {
+		if true {
 			if dFree {
 				tInfo, err := xmlydownloader.GetFreeTrackInfo(v.TrackID, "")
 				if err != nil {
 					log.Fatalln(err)
 				}
-				filePath := fmt.Sprintf("./%s/%s.mp3", path, tInfo.Title)
+
+				prefixStr := fmt.Sprintf("%s.%03d", prefix, index)
+				filePath := fmt.Sprintf("./%s/%s-%s.mp3", path, prefixStr, tInfo.Title)
 				fmt.Println(filePath)
 				grab.Get(filePath, tInfo.DownloadURL)
 				time.Sleep(2 * time.Second)
@@ -53,6 +57,7 @@ func download(path string, albumID int32, dFree, dVip bool, cookie string) (err 
 				time.Sleep(2 * time.Second)
 			}
 		}
+		index++
 	}
 	return
 }
